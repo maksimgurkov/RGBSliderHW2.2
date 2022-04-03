@@ -19,33 +19,48 @@ class ViewController: UIViewController {
     @IBOutlet weak var greenSlider: UISlider!
     @IBOutlet weak var blueSlider: UISlider!
     
+    @IBOutlet weak var redTextField: UITextField!
+    @IBOutlet weak var greenTextField: UITextField!
+    @IBOutlet weak var blueTextField: UITextField!
+    
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        navigationItem.hidesBackButton = true
+        
         colorRGBView.layer.cornerRadius = 15
         
-        setValueForLabel()
         viewColor()
+        setValueLabel(for: redLabel, greenLabel, blueLabel)
+        setValueTextField(for: redTextField, greenTextField, blueTextField)
+        
     }
     
-    @IBAction func rgbSlider() {
-        
-        setValueForLabel()
-        viewColor()
-        
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesBegan(touches, with: event)
+        view.endEditing(true)
     }
-
+    
+    @IBAction func rgbSliders(_ sender: UISlider) {
+        viewColor()
+        switch sender {
+        case redSlider:
+            redLabel.text = string(from: redSlider)
+            redTextField.text = string(from: redSlider)
+        case greenSlider:
+            greenLabel.text = string(from: greenSlider)
+            greenTextField.text = string(from: greenSlider)
+        default:
+            blueLabel.text = string(from: blueSlider)
+            blueTextField.text = string(from: blueSlider)
+        }
+    }
 }
 
 //MARK: - Privet Func
 extension ViewController {
-    
-    private func setValueForLabel() {
-        redLabel.text = String(format: "%.2f", redSlider.value)
-        greenLabel.text = String(format: "%.2f", greenSlider.value)
-        blueLabel.text = String(format: "%.2f", blueSlider.value)
-    }
     
     private func viewColor() {
         colorRGBView.backgroundColor = UIColor(red: CGFloat(redSlider.value),
@@ -54,5 +69,41 @@ extension ViewController {
                                                alpha: 1)
     }
     
+    private func setValueLabel(for labels: UILabel...) {
+        labels.forEach { label in
+            switch label {
+            case redLabel:
+                redLabel.text = string(from: redSlider)
+            case greenLabel:
+                greenLabel.text = string(from: greenSlider)
+            default:
+                blueLabel.text = string(from: blueSlider)
+            }
+        }
+    }
+    
+    private func setValueTextField(for textFields: UITextField...) {
+        textFields.forEach { textField in
+            switch textField {
+            case redTextField:
+                redTextField.text = string(from: redSlider)
+            case greenTextField:
+                greenTextField.text = string(from: greenSlider)
+            default:
+                blueTextField.text = string(from: blueSlider)
+            }
+        }
+    }
+    
+    private func string(from slider: UISlider) -> String {
+        String(format: "%.2f", slider.value)
+    }
+    
+}
+
+extension ViewController: UITextFieldDelegate {
+    func textFieldDidEndEditing(_ textField: UITextField) {
+       
+    }
 }
 
