@@ -23,19 +23,26 @@ class ViewController: UIViewController {
     @IBOutlet weak var greenTextField: UITextField!
     @IBOutlet weak var blueTextField: UITextField!
     
-    
+    var delegate: SettingsViewControllerProtocol!
+    var color: UIColor!
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        navigationItem.hidesBackButton = true
+        redTextField.delegate = self
+        greenTextField.delegate = self
+        blueTextField.delegate = self
         
         colorRGBView.layer.cornerRadius = 15
+        colorRGBView.backgroundColor = color
         
-        viewColor()
+        setSliders()
         setValueLabel(for: redLabel, greenLabel, blueLabel)
         setValueTextField(for: redTextField, greenTextField, blueTextField)
         
+        addDoneButtonTo(redTextField)
+        addDoneButtonTo(greenTextField)
+        addDoneButtonTo(blueTextField)
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -57,16 +64,32 @@ class ViewController: UIViewController {
             blueTextField.text = string(from: blueSlider)
         }
     }
+    
+    @IBAction func saveButtonRGB(_ sender: Any) {
+        delegate.settingsView(color: colorRGBView.backgroundColor ?? .white)
+        dismiss(animated: true)
+    }
+    
 }
 
 //MARK: - Privet Func
 extension ViewController {
     
+    private func setSliders() {
+        let ciColor = CIColor(color: color)
+        
+        redSlider.value = Float(ciColor.red)
+        greenSlider.value = Float(ciColor.green)
+        blueSlider.value = Float(ciColor.blue)
+    }
+    
     private func viewColor() {
-        colorRGBView.backgroundColor = UIColor(red: CGFloat(redSlider.value),
-                                               green: CGFloat(greenSlider.value),
-                                               blue: CGFloat(blueSlider.value),
-                                               alpha: 1)
+        colorRGBView.backgroundColor = UIColor(
+            red: CGFloat(redSlider.value),
+            green: CGFloat(greenSlider.value),
+            blue: CGFloat(blueSlider.value),
+            alpha: 1
+        )
     }
     
     private func setValueLabel(for labels: UILabel...) {
@@ -99,11 +122,65 @@ extension ViewController {
         String(format: "%.2f", slider.value)
     }
     
+    private func alertController(title: String, message: String) {
+        let alert = UIAlertController(
+            title: title,
+            message: message,
+            preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "OK", style: .default)
+        alert.addAction(okAction)
+        
+        present(alert, animated: true)
+    }
+    
+    private func addDoneButtonTo(_ textField: UITextField) {
+        let keyboardToolbar = UIToolbar()
+        textField.inputAccessoryView = keyboardToolbar
+        keyboardToolbar.sizeToFit()
+        
+        let doneButton = UIBarButtonItem(title: "Done",
+                                         style: .done,
+                                         target: self,
+                                         action: #selector(didTapDone))
+        let flexBarButton = UIBarButtonItem(barButtonSystemItem: .fixedSpace,
+                                            target: nil,
+                                            action: nil)
+        keyboardToolbar.setItems([flexBarButton, doneButton], animated: false)
+    }
+    @objc private func didTapDone() {
+        view.endEditing(true)
+    }
+    
 }
 
 extension ViewController: UITextFieldDelegate {
+    
     func textFieldDidEndEditing(_ textField: UITextField) {
-       
+        guard let newValue = textField.text else { return }
+        if let numbervalue = Float(newValue) {
+        
+        switch textField {
+        case redTextField:
+            redSlider.value = numbervalue
+            setValueLabel(for: redLabel)
+        case greenTextField:
+            greenSlider.value = numbervalue
+            setValueLabel(for: greenLabel)
+        case blueTextField:
+            blueSlider.value = numbervalue
+            setValueLabel(for: blueLabel)
+        default: break
+        }
+            
+        viewColor()
+            
+        } else {
+            alertController(title: "Внимание", message: "Не верный формат ввода")
+        }
     }
+
+
+
 }
+
 
