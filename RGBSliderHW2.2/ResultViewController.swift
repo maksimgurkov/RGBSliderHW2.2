@@ -12,11 +12,7 @@ protocol SettingsViewControllerProtocol {
 }
 
 class ResultViewController: UIViewController {
-        
-    override func viewDidLoad() {
-        super.viewDidLoad()
-    }
-    
+            
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         guard let settingsVC = segue.destination as? ViewController else { return }
         settingsVC.delegate = self
@@ -30,6 +26,5 @@ extension ResultViewController: SettingsViewControllerProtocol {
     func settingsView(color: UIColor) {
         view.backgroundColor = color
     }
-    
-    
+
 }
